@@ -1,43 +1,25 @@
-import {createServer} from "http";
-import {env} from "./env";
 import express from "express";
-import cors from "cors";
+import pokemonCardsRoutes from "./routes/pokemonCards.routes";
+import usersRoutes from "./routes/users.routes";
+import swaggerUi from "swagger-ui-express";
+import { swaggerSpec } from "./swagger";
 
-// Create Express app
 export const app = express();
-
-// Middlewares
-app.use(
-    cors({
-        origin: true,  // Autorise toutes les origines
-        credentials: true,
-    }),
-);
 
 app.use(express.json());
 
-// Serve static files (Socket.io test client)
-app.use(express.static('public'));
+app.use(pokemonCardsRoutes);
+app.use(usersRoutes);
 
-// Health check endpoint
-app.get("/api/health", (_req, res) => {
-    res.json({status: "ok", message: "TCG Backend Server is running"});
-});
+app.use("/api-docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 
-// Start server only if this file is run directly (not imported for tests)
-if (require.main === module) {
-    // Create HTTP server
-    const httpServer = createServer(app);
+const port = process.env.PORT || 3000;
 
+export const server =
+  process.env.NODE_ENV === "test" ? undefined : app.listen(port);
 
-    // Start server
-    try {
-        httpServer.listen(env.PORT, () => {
-            console.log(`\n🚀 Server is running on http://localhost:${env.PORT}`);
-            console.log(`🧪 Socket.io Test Client available at http://localhost:${env.PORT}`);
-        });
-    } catch (error) {
-        console.error("Failed to start server:", error);
-        process.exit(1);
-    }
+  export function stopServer() {
+  if (server) {
+    server.close();
+  }
 }

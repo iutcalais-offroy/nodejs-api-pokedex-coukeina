@@ -1,71 +1,86 @@
-import bcrypt from "bcryptjs";
-import {readFileSync} from "fs";
-import {join} from "path";
-import {prisma} from "../src/database";
-import {CardModel} from "../src/generated/prisma/models/Card";
-import {PokemonType} from "../src/generated/prisma/enums";
+import { PrismaClient } from "@prisma/client";
+
+const prisma = new PrismaClient();
 
 async function main() {
-    console.log("🌱 Starting database seed...");
+  await prisma.pokemonCard.deleteMany();
+  await prisma.type.deleteMany();
 
-    await prisma.card.deleteMany();
-    await prisma.user.deleteMany();
+  await prisma.type.createMany({
+    data: [
+      { name: "Normal" },
+      { name: "Fire" },
+      { name: "Water" },
+      { name: "Grass" },
+      { name: "Electric" },
+      { name: "Ice" },
+      { name: "Fighting" },
+      { name: "Poison" },
+      { name: "Ground" },
+      { name: "Flying" },
+      { name: "Psychic" },
+      { name: "Bug" },
+      { name: "Rock" },
+      { name: "Ghost" },
+      { name: "Dragon" },
+      { name: "Dark" },
+      { name: "Steel" },
+      { name: "Fairy" },
+    ],
+  });
 
-    const hashedPassword = await bcrypt.hash("password123", 10);
+  const grass = await prisma.type.findUnique({ where: { name: "Grass" } });
+  const fire = await prisma.type.findUnique({ where: { name: "Fire" } });
+  const water = await prisma.type.findUnique({ where: { name: "Water" } });
 
-    await prisma.user.createMany({
-        data: [
-            {
-                username: "red",
-                email: "red@example.com",
-                password: hashedPassword,
-            },
-            {
-                username: "blue",
-                email: "blue@example.com",
-                password: hashedPassword,
-            },
-        ],
-    });
+  if (!grass || !fire || !water) {
+    throw new Error("Types not found");
+  }
 
-    const redUser = await prisma.user.findUnique({where: {email: "red@example.com"}});
-    const blueUser = await prisma.user.findUnique({where: {email: "blue@example.com"}});
+  // PokemonCards
+  await prisma.pokemonCard.createMany({
+    data: [
+      {
+        name: "Bulbizarre",
+        pokedexId: 1,
+        typeId: grass.id,
+        lifePoints: 45,
+        size: 0.7,
+        weight: 6.9,
+        imageUrl:
+          "https://assets.pokemon.com/assets/cms2/img/pokedex/full/001.png",
+      },
+      {
+        name: "Salamèche",
+        pokedexId: 4,
+        typeId: fire.id,
+        lifePoints: 39,
+        size: 0.6,
+        weight: 8.5,
+        imageUrl:
+          "https://assets.pokemon.com/assets/cms2/img/pokedex/full/004.png",
+      },
+      {
+        name: "Carapuce",
+        pokedexId: 7,
+        typeId: water.id,
+        lifePoints: 44,
+        size: 0.5,
+        weight: 9.0,
+        imageUrl:
+          "https://assets.pokemon.com/assets/cms2/img/pokedex/full/007.png",
+      },
+    ],
+  });
 
-    if (!redUser || !blueUser) {
-        throw new Error("Failed to create users");
-    }
-
-    console.log("✅ Created users:", redUser.username, blueUser.username);
-
-    const pokemonDataPath = join(__dirname, "data", "pokemon.json");
-    const pokemonJson = readFileSync(pokemonDataPath, "utf-8");
-    const pokemonData: CardModel[] = JSON.parse(pokemonJson);
-
-    const createdCards = await Promise.all(
-        pokemonData.map((pokemon) =>
-            prisma.card.create({
-                data: {
-                    name: pokemon.name,
-                    hp: pokemon.hp,
-                    attack: pokemon.attack,
-                    type: PokemonType[pokemon.type as keyof typeof PokemonType],
-                    pokedexNumber: pokemon.pokedexNumber,
-                    imgUrl: `https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/other/official-artwork/${pokemon.pokedexNumber}.png`,
-                },
-            })
-        )
-    );
-
-    console.log(`✅ Created ${pokemonData.length} Pokemon cards`);
-
-    console.log("\n🎉 Database seeding completed!");
+  console.log("Seed completed!");
 }
 
 main()
-    .catch((e) => {
-        console.error("❌ Error seeding database:", e);
-        process.exit(1);
-    })
-    .finally(async () => {
-        await prisma.$disconnect();
-    });
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
+  .finally(async () => {
+    await prisma.$disconnect();
+  });

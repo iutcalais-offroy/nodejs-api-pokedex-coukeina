@@ -1,56 +1,63 @@
 {
-  "name": "template-tcg-api",
+  "name": "nodejs-pokedex-api",
   "version": "1.0.0",
-  "author": "",
-  "description": "TCG Pokemon-like Backend Server",
-  "main": "dist/index.js",
+  "description": "Nous allons tâcher de créer une API permettant d'effectuer des opérations CRUD sur les pokémons. Ce projet sera réalisé avec Express pour la gestion des routes et avec une base de donnée NoSQL.",
+  "main": "build/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
+    "dev": "nodemon --exec ts-node ./src/index.ts",
+    "start": "node ./build/index.js",
+    "type-check": "tsc --noEmit",
     "build": "tsc",
-    "ts:check": "tsc --noEmit",
-    "start": "node dist/index.js",
-    "test": "vitest --coverage --run",
-    "test:ui": "vitest --ui",
-    "db:start": "docker compose up -d",
-    "db:stop": "docker compose down",
-    "db:generate": "prisma generate",
+    "db:reset": "prisma migrate reset --force",
     "db:migrate": "prisma migrate dev",
+    "db:generate": "prisma generate",
     "db:studio": "prisma studio",
-    "db:seed": "npm run db:generate && tsx prisma/seed.ts",
-    "db:reset": "npm run db:generate && prisma migrate reset --force && npm run db:seed"
+    "test": "jest --runInBand",
+    "test:coverage": "jest --coverage --runInBand"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/vfourny/nodejs-pokedex-api.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/vfourny/nodejs-pokedex-api/issues"
+  },
+  "homepage": "https://github.com/vfourny/nodejs-pokedex-api#readme",
   "dependencies": {
-    "@prisma/adapter-pg": "7.1.0",
-    "@prisma/client": "7.1.0",
-    "bcryptjs": "2.4.3",
-    "cors": "2.8.5",
-    "dotenv": "16.3.1",
-    "express": "4.18.2",
-    "http-status-codes": "2.3.0",
-    "js-yaml": "4.1.1",
-    "jsonwebtoken": "9.0.2",
-    "pg": "8.16.3",
-    "prisma": "7.1.0",
-    "socket.io": "4.6.1",
-    "swagger-ui-express": "5.0.1",
-    "uuid": "13.0.0"
+    "@prisma/client": "^6.19.2",
+    "bcrypt": "^5.1.1",
+    "express": "^4.21.2",
+    "jsonwebtoken": "^9.0.2",
+    "swagger-jsdoc": "^6.2.8",
+    "swagger-ui-express": "^5.0.1",
+    "yamljs": "^0.3.0"
   },
   "devDependencies": {
-    "@types/bcryptjs": "2.4.6",
-    "@types/cors": "2.8.17",
-    "@types/express": "4.17.21",
-    "@types/js-yaml": "4.0.9",
-    "@types/jsonwebtoken": "9.0.5",
-    "@types/node": "20.19.25",
-    "@types/pg": "8.16.0",
-    "@types/swagger-ui-express": "4.1.8",
-    "@types/uuid": "10.0.0",
-    "@vitest/coverage-v8": "4.0.15",
-    "@vitest/ui": "4.0.15",
-    "tsx": "4.7.0",
-    "typescript": "5.4.5",
-    "vite-tsconfig-paths": "5.1.4",
-    "vitest": "4.0.15",
-    "vitest-mock-extended": "3.1.0"
+    "@types/bcrypt": "^5.0.2",
+    "@types/express": "^5.0.0",
+    "@types/jest": "^29.5.14",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/node": "^22.10.2",
+    "@types/supertest": "^6.0.2",
+    "@types/swagger-jsdoc": "^6.0.4",
+    "@types/swagger-ui-express": "^4.1.8",
+    "@types/yamljs": "^0.2.34",
+    "jest": "^29.7.0",
+    "jest-mock-extended": "^4.0.0-beta1",
+    "nodemon": "^3.1.9",
+    "prisma": "^6.19.2",
+    "supertest": "^7.0.0",
+    "ts-jest": "^29.2.5",
+    "ts-node": "^10.9.2",
+    "typescript": "^5.7.3"
+  },
+  "engines": {
+    "node": ">=22 <23"
+  },
+  "prisma": {
+    "seed": "ts-node prisma/seed.ts"
   }
 }
